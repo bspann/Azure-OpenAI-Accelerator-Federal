@@ -1,6 +1,6 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# 3 or 5 days POC VBD powered by: Azure Search + Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Bing Search API
+# 3 or 5 days POC VBD powered by: Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + External Vector DB
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator?quickstart=1)
 [![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)
 
@@ -38,19 +38,18 @@ The repo is made to teach you step-by-step on how to build a OpenAI based Smart 
 
 ---
 # Architecture 
-![Architecture](./images/GPT-Smart-Search-Architecture.jpg "Architecture")
+![Architecture](./images/AOAI-SmartSearch-AzureGov-Architecture.jpg "Architecture")
 
 ## Flow
 1. The user asks a question.
 2. In the app, an OpenAI LLM uses a clever prompt to determine which source contains the answer to the question.
 3. Four types of sources are available:
    * 3a. Azure SQL Database - contains COVID-related statistics in the US.
-   * 3b. Azure Bing Search API - provides access to the internet allowing scenerios like: QnA on public websites .
-   * 3c. Azure Cognitive Search - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
-      * 3c.1. Uses an LLM (OpenAI) to vectorize the top K document chunks from 3c.
-      * 3c.2. Uses in-memory cosine similarity to get the top N chunks.
-      * 3c.3. Uses an OpenAI GPT model to craft the response from the Cog Search Engine (3c) by combining the question and the top N chunks.
-   * 3d. CSV Tabular File - contains COVID-related statistics in the US.
+   * 3b. External Vector DB - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
+      * 3b.1. Uses an LLM (OpenAI) to vectorize the top K document chunks from 3c.
+      * 3b.2. Uses in-memory cosine similarity to get the top N chunks.
+      * 3b.3. Uses an OpenAI GPT model to craft the response from the Cog Search Engine (3c) by combining the question and the top N chunks.
+   * 3c. CSV Tabular File - contains COVID-related statistics in the US.
 4. The app retrieves the result from the source and crafts the answer.
 5. The tuple (Question and Answer) is saved to CosmosDB to keep a record of the interaction.
 6. The answer is delivered to the user.
@@ -58,7 +57,7 @@ The repo is made to teach you step-by-step on how to build a OpenAI based Smart 
 ---
 ## Demo
 
-https://gptsmartsearch.azurewebsites.net/
+https://gptsmartsearch.azurewebsites.us/
 
 To open the Bot in MS Teams, click [HERE](https://teams.microsoft.com/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)
 
