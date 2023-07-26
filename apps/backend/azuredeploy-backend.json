@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "16396897643437323274"
+      "templateHash": "6739104760473314510"
     }
   },
   "parameters": {
@@ -114,7 +114,7 @@
     },
     "botSKU": {
       "type": "string",
-      "defaultValue": "S1",
+      "defaultValue": "F0",
       "allowedValues": [
         "F0",
         "S1"
@@ -153,7 +153,7 @@
   "variables": {
     "publishingUsername": "[format('${0}', parameters('botId'))]",
     "webAppName": "[format('webApp-Backend-{0}', parameters('botId'))]",
-    "siteHost": "[format('{0}.azurewebsites.us', variables('webAppName'))]",
+    "siteHost": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
     "botEndpoint": "[format('https://{0}/api/messages', variables('siteHost'))]"
   },
   "resources": [
@@ -180,12 +180,12 @@
         "enabled": true,
         "hostNameSslStates": [
           {
-            "name": "[format('{0}.azurewebsites.us', variables('webAppName'))]",
+            "name": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
             "sslState": "Disabled",
             "hostType": "Standard"
           },
           {
-            "name": "[format('{0}.scm.azurewebsites.us', variables('webAppName'))]",
+            "name": "[format('{0}.scm.azurewebsites.net', variables('webAppName'))]",
             "sslState": "Disabled",
             "hostType": "Repository"
           }
@@ -215,7 +215,7 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]"
+              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
@@ -259,7 +259,7 @@
             },
             {
               "name": "AZURE_COSMOSDB_ENDPOINT",
-              "value": "[format('https://{0}.documents.azure.com:443/', parameters('cosmosDBAccountName'))]"
+              "value": "[format('https://{0}.documents.azure.us:443/', parameters('cosmosDBAccountName'))]"
             },
             {
               "name": "AZURE_COSMOSDB_NAME",
