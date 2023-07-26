@@ -30,12 +30,6 @@ param azureOpenAIModelName string = 'gpt-4'
 @description('Optional. The API version for the Azure OpenAI service.')
 param azureOpenAIAPIVersion string = '2023-03-15-preview'
 
-@description('Optional. The URL for the Bing Search service.')
-param bingSearchUrl string = 'https://api.bing.microsoft.com/v7.0/search'
-
-@description('Required. The name of the Bing Search service deployed previously.')
-param bingSearchName string
-
 @description('Required. The name of the SQL server deployed previously.')
 param SQLServerName string
 
@@ -91,12 +85,6 @@ resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existi
 resource azureOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: azureOpenAIName
   scope: resourceGroup(resourceGroupOpenAI)
-}
-
-// Existing Bing Search resource.
-resource bingSearch 'Microsoft.Bing/accounts@2020-06-10' existing = {
-  name: bingSearchName
-  scope: resourceGroup(resourceGroupSearch)
 }
 
 // Existing SQL Server resource.
@@ -195,14 +183,6 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: azureOpenAIAPIVersion
         }
         {
-          name: 'BING_SEARCH_URL'
-          value: bingSearchUrl
-        }
-        {
-          name: 'BING_SUBSCRIPTION_KEY'
-          value: bingSearch.listKeys().key1
-        }
-        {
           name: 'SQL_SERVER_ENDPOINT'
           value: 'https://${SQLServerName}${environment().suffixes.sqlServerHostname}'
         }
@@ -220,7 +200,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_COSMOSDB_ENDPOINT'
-          value: 'https://${cosmosDBAccountName}.documents.azure.com:443/'
+          value: 'https://${cosmosDBAccountName}.documents.azure.us:443/'
         }
         {
           name: 'AZURE_COSMOSDB_NAME'
@@ -241,8 +221,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
       ]
       cors: {
         allowedOrigins: [
-          'https://botservice.hosting.portal.azure.net'
-          'https://hosting.onecloud.azure-test.net/'
+          '*'
         ]
       }
     }

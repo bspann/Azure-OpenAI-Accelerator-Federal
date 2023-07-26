@@ -5,7 +5,6 @@ import re
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from langchain.chat_models import AzureChatOpenAI
-from langchain.utilities import BingSearchAPIWrapper
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents import ConversationalChatAgent, AgentExecutor, Tool
 from typing import Any, Dict, List, Optional, Union

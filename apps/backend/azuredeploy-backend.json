@@ -74,19 +74,6 @@
         "description": "Optional. The API version for the Azure OpenAI service."
       }
     },
-    "bingSearchUrl": {
-      "type": "string",
-      "defaultValue": "https://api.bing.microsoft.com/v7.0/search",
-      "metadata": {
-        "description": "Optional. The URL for the Bing Search service."
-      }
-    },
-    "bingSearchName": {
-      "type": "string",
-      "metadata": {
-        "description": "Required. The name of the Bing Search service deployed previously."
-      }
-    },
     "SQLServerName": {
       "type": "string",
       "metadata": {
@@ -127,7 +114,7 @@
     },
     "botSKU": {
       "type": "string",
-      "defaultValue": "F0",
+      "defaultValue": "S1",
       "allowedValues": [
         "F0",
         "S1"
@@ -166,7 +153,7 @@
   "variables": {
     "publishingUsername": "[format('${0}', parameters('botId'))]",
     "webAppName": "[format('webApp-Backend-{0}', parameters('botId'))]",
-    "siteHost": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
+    "siteHost": "[format('{0}.azurewebsites.us', variables('webAppName'))]",
     "botEndpoint": "[format('https://{0}/api/messages', variables('siteHost'))]"
   },
   "resources": [
@@ -193,12 +180,12 @@
         "enabled": true,
         "hostNameSslStates": [
           {
-            "name": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
+            "name": "[format('{0}.azurewebsites.us', variables('webAppName'))]",
             "sslState": "Disabled",
             "hostType": "Standard"
           },
           {
-            "name": "[format('{0}.scm.azurewebsites.net', variables('webAppName'))]",
+            "name": "[format('{0}.scm.azurewebsites.us', variables('webAppName'))]",
             "sslState": "Disabled",
             "hostType": "Repository"
           }
@@ -228,7 +215,7 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
+              "value": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
@@ -253,14 +240,6 @@
             {
               "name": "AZURE_OPENAI_API_VERSION",
               "value": "[parameters('azureOpenAIAPIVersion')]"
-            },
-            {
-              "name": "BING_SEARCH_URL",
-              "value": "[parameters('bingSearchUrl')]"
-            },
-            {
-              "name": "BING_SUBSCRIPTION_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Bing/accounts', parameters('bingSearchName')), '2020-06-10').key1]"
             },
             {
               "name": "SQL_SERVER_ENDPOINT",
@@ -301,8 +280,7 @@
           ],
           "cors": {
             "allowedOrigins": [
-              "https://botservice.hosting.portal.azure.net",
-              "https://hosting.onecloud.azure-test.net/"
+              "*"
             ]
           }
         }

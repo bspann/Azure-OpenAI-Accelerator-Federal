@@ -16,15 +16,32 @@ from botbuilder.core import (
 from botbuilder.core.integration import aiohttp_error_middleware
 from botbuilder.schema import Activity, ActivityTypes
 
+#Required for Azure Gov
+from botframework.connector.auth._government_cloud_bot_framework_authentication import(   
+    GovernmentConstants                
+)
+#Required for Azure Gov
+from botframework.connector.auth.simple_channel_provider import(
+    SimpleChannelProvider
+)
+
 from bot import MyBot
 from config import DefaultConfig
 
+import streamlit as st
+import logging
+
 CONFIG = DefaultConfig()
+
+#Required for Azure Gov
+CHANNEL_SERVICE = SimpleChannelProvider(GovernmentConstants.CHANNEL_SERVICE)  #creating simplechannelProvider jebrook
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
-SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD)
+# Required for Azure Gov: channel_provider
+SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD, channel_provider=CHANNEL_SERVICE)
 ADAPTER = BotFrameworkAdapter(SETTINGS)
+ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
 
 
 # Catch-all for errors.
