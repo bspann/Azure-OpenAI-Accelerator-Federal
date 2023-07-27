@@ -54,7 +54,7 @@ param botId string = 'BotId-${uniqueString(resourceGroup().id)}'
   'F0'
   'S1'
 ])
-param botSKU string = 'F0'
+param botSKU string = 'S1'
 
 @description('Optional. The name of the new App Service Plan.')
 param appServicePlanName string = 'AppServicePlan-Backend-${uniqueString(resourceGroup().id)}'
@@ -72,7 +72,7 @@ param location string = resourceGroup().location
 
 var publishingUsername = '$${botId}'
 var webAppName = 'webApp-Backend-${botId}'
-var siteHost = '${webAppName}.azurewebsites.net'
+var siteHost = '${webAppName}.azurewebsites.us'
 var botEndpoint = 'https://${siteHost}/api/messages'
 
 // Existing Azure Search service.
@@ -121,12 +121,12 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
     enabled: true
     hostNameSslStates: [
       {
-        name: '${webAppName}.azurewebsites.net'
+        name: '${webAppName}.azurewebsites.us'
         sslState: 'Disabled'
         hostType: 'Standard'
       }
       {
-        name: '${webAppName}.scm.azurewebsites.net'
+        name: '${webAppName}.scm.azurewebsites.us'
         sslState: 'Disabled'
         hostType: 'Repository'
       }
