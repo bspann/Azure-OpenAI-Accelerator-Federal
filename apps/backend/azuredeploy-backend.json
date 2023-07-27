@@ -215,7 +215,7 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
+              "value": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",

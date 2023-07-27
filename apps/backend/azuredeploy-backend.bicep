@@ -156,7 +156,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_SEARCH_ENDPOINT'
-          value: 'https://${azureSearchName}.search.windows.net'
+          value: 'https://${azureSearchName}.search.azure.us'
         }
         {
           name: 'AZURE_SEARCH_KEY'

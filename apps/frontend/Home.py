@@ -17,12 +17,6 @@ st.markdown("""
     
     **👈 Select a demo from the sidebar** to see an example of a Search Interface, and a Bot Interface.
 
-    ### Want to learn more?
-    - Check out [Github Repo](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/)
-    - Jump into [Azure OpenAI documentation](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/)
-    - Ask a question or submit a [GitHub Issue!](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/issues/new)
-
-
 """
 )
 st.markdown("---")
