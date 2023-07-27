@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "4179049765400023452"
+      "templateHash": "3504967437035532521"
     }
   },
   "parameters": {
@@ -147,7 +147,7 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
+              "value": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",

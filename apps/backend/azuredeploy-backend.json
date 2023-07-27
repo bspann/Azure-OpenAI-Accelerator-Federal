@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.19.5.34762",
-      "templateHash": "8080107533233091384"
+      "templateHash": "11108736447795866142"
     }
   },
   "parameters": {
@@ -114,7 +114,7 @@
     },
     "botSKU": {
       "type": "string",
-      "defaultValue": "F0",
+      "defaultValue": "S1",
       "allowedValues": [
         "F0",
         "S1"
@@ -153,7 +153,7 @@
   "variables": {
     "publishingUsername": "[format('${0}', parameters('botId'))]",
     "webAppName": "[format('webApp-Backend-{0}', parameters('botId'))]",
-    "siteHost": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
+    "siteHost": "[format('{0}.azurewebsites.us', variables('webAppName'))]",
     "botEndpoint": "[format('https://{0}/api/messages', variables('siteHost'))]"
   },
   "resources": [
@@ -180,12 +180,12 @@
         "enabled": true,
         "hostNameSslStates": [
           {
-            "name": "[format('{0}.azurewebsites.net', variables('webAppName'))]",
+            "name": "[format('{0}.azurewebsites.us', variables('webAppName'))]",
             "sslState": "Disabled",
             "hostType": "Standard"
           },
           {
-            "name": "[format('{0}.scm.azurewebsites.net', variables('webAppName'))]",
+            "name": "[format('{0}.scm.azurewebsites.us', variables('webAppName'))]",
             "sslState": "Disabled",
             "hostType": "Repository"
           }
