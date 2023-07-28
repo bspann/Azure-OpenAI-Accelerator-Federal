@@ -1,6 +1,7 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# 3 or 5 days POC VBD powered by: Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + External Vector DB
+# GPT Powered Search Accelerator built for Azure Government Customers 
+# Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Vector Store
 
 [![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/FEDCSUMission/)
 
