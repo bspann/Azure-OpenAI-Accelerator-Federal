@@ -1,38 +1,25 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
 # 3 or 5 days POC VBD powered by: Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + External Vector DB
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator?quickstart=1)
-[![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)
+
+[![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/FEDCSUMission/)
 
 Your organization requires a Multi-Channel Smart Chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
 
-The goal of the MVP POC is to show/prove the value of a GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The deliverables are:
+This repo helps you accelerate your solution for building enterprise GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The solution consists of:
 
 1. Backend Bot API built with Bot Framework and exposed to multiple channels (Web Chat, MS Teams, SMS, Email, Slack, etc)
 2. Frontend web application with a Search and a Bot UI.
 
-The repo is made to teach you step-by-step on how to build a OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building the two applications.
-
-**For Microsoft FTEs:** This is a customer funded VBD, below the assets for the delivery.
-
-| **Item**                   | **Description**                                                                                                     | **Link**                                                                                                                                                |
-|----------------------------|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| VBD SKU Info and Datasheet                   | CSAM must dispatch it as "Customer Invested" against credits/hours of Unified Support Contract. Customer decides if 3 or 5 days.                                      | [ESXP SKU page](https://esxp.microsoft.com/#/omexplanding/services/14486/geo/USA/details/1)                                                                                              |
-| VBD Accreditation for CSAs     | Links for CSAs to get the Accreditation needed to deliver the workshop                                                                      | [Link 1](https://learningplayer.microsoft.com/activity/s9261799/launch) , [Link 2](https://learningplayer.microsoft.com/activity/s9264662/launch) |
-| VBD 3-5 day POC Asset (IP)  | The MVP to be delivered  (this GitHub repo)                                     | [Azure-Cognitive-Search-Azure-OpenAI-Accelerator](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator)                |
-| VBD Workshop Deck          | The deck introducing and explaining the workshop                                                                    | [Intro AOAI GPT Azure Smart Search Engine Accelerator.pptx](https://github.com/MSUSAzureAccelerators/Azure-Cognitive-Search-Azure-OpenAI-Accelerator/blob/main/Intro%20AOAI%20GPT%20Azure%20Smart%20Search%20Engine%20Accelerator.pptx) |
-| CSA Training Video         | 2 Hour Training for Microsoft CSA's                                                                    | [POC VBD Training Recording](https://microsoft-my.sharepoint.com/:v:/p/jheseltine/EbxoBjWHJ-NJsnAM3qWXvVQBTK28SW7hgIrn7KaAJ77yaA?e=abiunn) |
-
+The repo is made to teach you step-by-step on how to build an OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building the two applications.
 
 ---
-**Prerequisites Client 3-5 Days POC**
+**Prerequisites**
 * Azure subscription
 * Accepted Application to Azure Open AI, including GPT-4 (mandatory)
-* Microsoft members need to be added as Guests in clients Azure AD
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
-* The customer team and the Microsoft team must have Contributor permissions to this resource group so they can set everything up 2 weeks prior to the workshop
 * A storage account must be set in place in the RG.
-* Data/Documents must be uploaded to the blob storage account, at least two weeks prior to the workshop date
+* Data/Documents must be uploaded to the blob storage account
 * For IDE collaboration during workshop, Jupyper Lab will be used, for this, Azure Machine Learning Workspace must be deployed in the RG
    * Note: Please ensure you have enough core compute quota in your Azure Machine Learning workspace 
 
@@ -57,24 +44,24 @@ The repo is made to teach you step-by-step on how to build a OpenAI based Smart 
 ---
 ## Demo
 
-https://gptsmartsearch.azurewebsites.us/
+https://webapp-frontend-rylu5pcprg6ja.azurewebsites.us/
 
-To open the Bot in MS Teams, click [HERE](https://teams.microsoft.com/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)
+To open the Bot in GCC-H MS Teams, click [HERE](https://teams.microsoft.us/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)
 
 ---
 
 ## 🔧**Features**
 
-   - Uses [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/) to Host the Bot API Backend and to expose it to multiple channels including MS Teams.
+   - Implements the AOAI application hosted in Azure Government cloud connecting to Azure OpenAI instance in Azure Commercial cloud, based on the recommended Microsoft architecture.
+   - Enables search/chat experience throuhg Microsoft Teams through the [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/).
    - 100% Python.
-   - Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
+   - Incorporates an external vector store (weaviate)
    - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores, constructing prompts and creating agents.
-   - Multi-Lingual (ingests, indexes and understand any language)
-   - Multi-Index -> multiple search indexes
    - Tabular Data Q&A with CSV files and SQL Databases
-   - Uses [Bing Search API](https://www.microsoft.com/en-us/bing/apis) to power internet searches in the bot
    - Uses CosmosDB as persistent memory to save user's conversations.
    - Uses [Streamlit](https://streamlit.io/) to build the Frontend web application in python.
+   - Optional: Uses [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/cognitive-services/) to index and enrich unstructured documents: Detect Language, OCR images, Key-phrases extraction, entity recognition (persons, emails, addresses, organizations, urls).
+
    
 
 ---
@@ -84,24 +71,20 @@ To open the Bot in MS Teams, click [HERE](https://teams.microsoft.com/l/chat/0/0
 Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 
 1. Fork this repo to your Github account.
-2. In Azure OpenAI studio, deploy these two models: **Make sure that the deployment name is the same as the model name.**
+2. In the Azure Commercial cloud in Azure OpenAI studio, deploy these two models: **Make sure that the deployment name is the same as the model name.**
    - "gpt-35-turbo" for the model "gpt-35-turbo (0301)". If you have "gpt-4", use it (it is definitely better)
    - "text-embedding-ada-002"
-3. Create a Resource Group where all the assets of this accelerator are going to be. Azure OpenAI can be in different RG or a different Subscription.
-4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Azure Cognitive Search, Cognitive Services, SQL Database, CosmosDB, Bing Search API):
+3. In the Azure Government cloud, create a Resource Group where all the assets of this accelerator are going to be. Use the Azure OpenAI endpoints and keys to configure and deploy the resources in Azure Government.
+4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Cognitive Services, SQL Database, CosmosDB):
 
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpablomarin%2FGPT-Azure-Search-Engine%2Fmain%2Fazuredeploy.json) 
+[![Deploy To Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FFederalCSUMission%2FAzure-OpenAI-Accelerator-Federal%2Fdavyu_updateAppAzureGov%2Fazuredeploy.json) 
 
 **Note**: If you have never created a `Cognitive services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
-5. Make sure that Semantic Search is enabled on your Azure Cognitive Search Service:
-   - On the left-nav pane, select Semantic Search (Preview).
-   - If not already selected, select either the Free plan or the Standard plan. You can switch between the free plan and the standard plan at any time.
+5. Clone your Forked repo to your local machine or AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
 
-6. Clone your Forked repo to your local machine or AML Compute Instance. If your repo is private, see below in Troubleshooting section how to clone a private repo.
-
-7. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
-8. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
+6. Make sure you run the notebooks on a **Python 3.10 conda enviroment**
+7. Install the dependencies on your machine (make sure you do the below pip comand on the same conda environment that you are going to run the notebooks. For example, in AZML compute instance run:
 ```
 conda activate azureml_py310_sdkv2
 pip install -r ./common/requirements.txt
@@ -117,11 +100,7 @@ pip install -r ./common/requirements.txt
   
 ## **FAQs**
 
-1. **Why the vector similarity is done in memory using FAISS versus having a separate vector database like RedisSearch or Pinecone?**
-
-A: True, doing the embeddings of the documents pages everytime that there is a query is not efficient. The ideal scenario is to vectorize the docs chunks once (first time they are needed) and then retrieve them from a database the next time they are needed. For this a special vector database is necessary. The ideal scenario though, is Azure Search to save and retreive the vectors as part of the search results, along with the document chunks. Azure Search will soon allow this in a few months, let's wait for it. As of right now the embedding process doesn't take that much time or money, so it is worth the wait versus using another database just for vectors. Once Azure Cog Search gets vector capabilities, the search/retrieval/answer process will be a lot faster.
-
-2. **Why use Azure Cognitive Search engine to provide the context for the LLM and not fine tune the LLM instead?**
+1. **Why do we use Prompt Engineering rather than the fine-tune approach?**
 
 A: Quoting the [OpenAI documentation](https://platform.openai.com/docs/guides/fine-tuning): "GPT-3 has been pre-trained on a vast amount of text from the open internet. When given a prompt with just a few examples, it can often intuit what task you are trying to perform and generate a plausible completion. This is often called "few-shot learning.
 Fine-tuning improves on few-shot learning by training on many more examples than can fit in the prompt, letting you achieve better results on a wide number of tasks. Once a model has been fine-tuned, you won't need to provide examples in the prompt anymore. This **saves costs and enables lower-latency requests**"

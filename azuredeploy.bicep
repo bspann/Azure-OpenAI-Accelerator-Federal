@@ -54,9 +54,6 @@ param SQLAdministratorLogin string
 @secure()
 param SQLAdministratorLoginPassword string
 
-@description('Optional. The name of the Bing Search API service')
-param bingSearchAPIName string = 'bing-search-${uniqueString(resourceGroup().id)}'
-
 @description('Optional. Cosmos DB account name, max length 44 characters, lowercase')
 param cosmosDBAccountName string = 'cosmosdb-account-${uniqueString(resourceGroup().id)}'
 
@@ -176,14 +173,5 @@ resource cosmosDBContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
       }
       defaultTtl: 1000
     }
-  }
-}
-
-resource bingSearchAccount 'Microsoft.Bing/accounts@2020-06-10' = {
-  kind: 'Bing.Search.v7'
-  name: bingSearchAPIName
-  location: 'global'
-  sku: {
-    name: 'S1'
   }
 }
