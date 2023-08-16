@@ -4,16 +4,16 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "3504967437035532521"
+      "version": "0.20.4.51522",
+      "templateHash": "10291947530786187860"
     }
   },
   "parameters": {
     "webAppName": {
       "type": "string",
       "defaultValue": "[format('webApp-Frontend-{0}', uniqueString(resourceGroup().id))]",
-      "maxLength": 60,
       "minLength": 2,
+      "maxLength": 60,
       "metadata": {
         "description": "Optional. Web app name must be between 2 and 60 characters."
       }
@@ -44,12 +44,12 @@
       }
     },
     "botDirectLineChannelKey": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "Required. The key to the direct line channel of your bot."
       }
     },
-    "datasourceSASToken": {
+    "blobSASToken": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
@@ -70,16 +70,9 @@
     },
     "azureSearchAPIVersion": {
       "type": "string",
-      "defaultValue": "2021-04-30-Preview",
+      "defaultValue": "2023-07-01-Preview",
       "metadata": {
         "description": "Optional. The API version of the Azure Search."
-      }
-    },
-    "resourceGroupOpenAI": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().name]",
-      "metadata": {
-        "description": "Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group."
       }
     },
     "azureOpenAIName": {
@@ -88,16 +81,22 @@
         "description": "Required. The name of the Azure OpenAI resource deployed previously."
       }
     },
+    "azureOpenAIAPIKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Required. The API key of the Azure OpenAI resource deployed previously."
+      }
+    },
     "azureOpenAIModelName": {
       "type": "string",
-      "defaultValue": "gpt-35-turbo",
+      "defaultValue": "gpt-4",
       "metadata": {
         "description": "Optional. The model name of the Azure OpenAI."
       }
     },
     "azureOpenAIAPIVersion": {
       "type": "string",
-      "defaultValue": "2023-03-15-preview",
+      "defaultValue": "2023-05-15",
       "metadata": {
         "description": "Optional. The API version of the Azure OpenAI."
       }
@@ -142,8 +141,8 @@
               "value": "[parameters('botDirectLineChannelKey')]"
             },
             {
-              "name": "DATASOURCE_SAS_TOKEN",
-              "value": "[parameters('datasourceSASToken')]"
+              "name": "BLOB_SAS_TOKEN",
+              "value": "[parameters('blobSASToken')]"
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
@@ -163,7 +162,7 @@
             },
             {
               "name": "AZURE_OPENAI_API_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupOpenAI')), 'Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), '2023-05-01').key1]"
+              "value": "[parameters('azureOpenAIAPIKey')]"
             },
             {
               "name": "AZURE_OPENAI_MODEL_NAME",
