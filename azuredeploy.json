@@ -94,13 +94,15 @@
       "type": "string",
       "metadata": {
         "description": "Required. The administrator username of the SQL logical server."
-      }
+      },
+      "defaultValue": "aoaiadmin"
     },
     "SQLAdministratorLoginPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The administrator password of the SQL logical server."
-      }
+      },
+      "defaultValue": "Yakuyaku1234!"
     },
     "cosmosDBAccountName": {
       "type": "string",
@@ -160,13 +162,12 @@
       "properties": {
         "replicaCount": "[parameters('azureSearchReplicaCount')]",
         "partitionCount": "[parameters('azureSearchPartitionCount')]",
-        "hostingMode": "[parameters('azureSearchHostingMode')]",
-        "semanticSearch": "free"
+        "hostingMode": "[parameters('azureSearchHostingMode')]"
       }
     },
     {
       "type": "Microsoft.CognitiveServices/accounts",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2022-12-01",
       "name": "[parameters('cognitiveServiceName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -274,18 +275,8 @@
       ]
     },
     {
-      "type": "Microsoft.Bing/accounts",
-      "apiVersion": "2020-06-10",
-      "name": "[parameters('bingSearchAPIName')]",
-      "kind": "Bing.Search.v7",
-      "location": "global",
-      "sku": {
-        "name": "S1"
-      }
-    },
-    {
       "type": "Microsoft.CognitiveServices/accounts",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2022-12-01",
       "name": "[parameters('formRecognizerName')]",
       "location": "[parameters('location')]",
       "sku": {

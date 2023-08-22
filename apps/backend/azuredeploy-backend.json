@@ -247,14 +247,6 @@
               "value": "[parameters('azureOpenAIAPIVersion')]"
             },
             {
-              "name": "BING_SEARCH_URL",
-              "value": "[parameters('bingSearchUrl')]"
-            },
-            {
-              "name": "BING_SUBSCRIPTION_KEY",
-              "value": "[listKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Bing/accounts', parameters('bingSearchName')), '2020-06-10').key1]"
-            },
-            {
               "name": "SQL_SERVER_NAME",
               "value": "[parameters('SQLServerName')]"
             },
@@ -284,7 +276,7 @@
             },
             {
               "name": "AZURE_COMOSDB_CONNECTION_STRING",
-              "value": "[listConnectionStrings(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2023-04-15').connectionStrings[0].connectionString]"
+              "value": "AccountEndpoint=https://cosmosdb-account-ce5kqagb2csv4.documents.azure.us:443/;AccountKey=dDRyOeP3UJz932LGggjj7i7B8XcfS0k08frvjfS20H3z0aEdYBwsx6HgGDMoDhJVqQ6D8rR8CGD5ACDbhIoauQ==;"
             },
             {
               "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
@@ -360,7 +352,7 @@
     },
     {
       "type": "Microsoft.BotService/botServices",
-      "apiVersion": "2022-09-15",
+      "apiVersion": "2022-06-15-preview",
       "name": "[parameters('botId')]",
       "location": "global",
       "kind": "azurebot",
