@@ -150,7 +150,7 @@
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[listAdminKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
+              "value": "cYXHCUXTO54SYaWjqxD56BaTwn0uBE3k0vn0OVDY28AzSeC9kAvJ"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
