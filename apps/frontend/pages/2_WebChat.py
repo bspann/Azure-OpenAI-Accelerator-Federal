@@ -143,6 +143,7 @@ f"""
       window.WebChat.renderWebChat(
         {{
           directLine: window.WebChat.createDirectLine({{
+            domain: 'https://directline.botframework.azure.us/v3/directline',
             token: '{BOT_DIRECTLINE_SECRET_KEY}'
           }}),
           renderMarkdown: markdownIt.render.bind(markdownIt),
