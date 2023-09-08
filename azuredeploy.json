@@ -4,16 +4,16 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.19.5.34762",
-      "templateHash": "2560700519876365465"
+      "version": "0.20.4.51522",
+      "templateHash": "17027619221182957879"
     }
   },
   "parameters": {
     "azureSearchName": {
       "type": "string",
       "defaultValue": "[format('cog-search-{0}', uniqueString(resourceGroup().id))]",
-      "maxLength": 60,
       "minLength": 2,
+      "maxLength": 60,
       "metadata": {
         "description": "Optional. Service name must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 60 characters in length."
       }
@@ -37,8 +37,8 @@
     "azureSearchReplicaCount": {
       "type": "int",
       "defaultValue": 1,
-      "maxValue": 12,
       "minValue": 1,
+      "maxValue": 12,
       "metadata": {
         "description": "Optional, defaults to 1. Replicas distribute search workloads across the service. You need at least two replicas to support high availability of query workloads (not applicable to the free tier). Must be between 1 and 12."
       }
@@ -94,13 +94,15 @@
       "type": "string",
       "metadata": {
         "description": "Required. The administrator username of the SQL logical server."
-      }
+      },
+      "defaultValue": "aoaiadmin"
     },
     "SQLAdministratorLoginPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Required. The administrator password of the SQL logical server."
-      }
+      },
+      "defaultValue": "Yakuyaku1234!"
     },
     "cosmosDBAccountName": {
       "type": "string",
@@ -121,6 +123,20 @@
       "defaultValue": "[format('cosmosdb-container-{0}', uniqueString(resourceGroup().id))]",
       "metadata": {
         "description": "Optional. The name for the CosmosDB database container"
+      }
+    },
+    "formRecognizerName": {
+      "type": "string",
+      "defaultValue": "[format('form-recognizer-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Optional. The name of the Form Recognizer service"
+      }
+    },
+    "blobStorageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('blobstorage{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Optional. The name of the Blob Storage account"
       }
     },
     "location": {
@@ -146,13 +162,12 @@
       "properties": {
         "replicaCount": "[parameters('azureSearchReplicaCount')]",
         "partitionCount": "[parameters('azureSearchPartitionCount')]",
-        "hostingMode": "[parameters('azureSearchHostingMode')]",
-        "semanticSearch": "free"
+        "hostingMode": "[parameters('azureSearchHostingMode')]"
       }
     },
     {
       "type": "Microsoft.CognitiveServices/accounts",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2022-12-01",
       "name": "[parameters('cognitiveServiceName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -257,6 +272,46 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('cosmosDBAccountName'), parameters('cosmosDBDatabaseName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2022-12-01",
+      "name": "[parameters('formRecognizerName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "FormRecognizer"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[parameters('blobStorageAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}', parameters('blobStorageAccountName'), 'default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('blobStorageAccountName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "blobStorageContainer",
+        "count": "[length(createArray('books', 'cord19', 'mixed'))]"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}/{2}', parameters('blobStorageAccountName'), 'default', createArray('books', 'cord19', 'mixed')[copyIndex()])]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('blobStorageAccountName'), 'default')]"
       ]
     }
   ]

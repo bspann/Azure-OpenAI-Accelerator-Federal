@@ -18,11 +18,12 @@ param appServicePlanName string = 'AppServicePlan-Frontend-${uniqueString(resour
 param botServiceName string
 
 @description('Required. The key to the direct line channel of your bot.')
+@secure()
 param botDirectLineChannelKey string
 
 @description('Required. The SAS token for the Azure Storage Account hosting your data')
 @secure()
-param datasourceSASToken string 
+param blobSASToken string 
 
 @description('Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group.')
 param resourceGroupSearch string = resourceGroup().name
@@ -31,19 +32,20 @@ param resourceGroupSearch string = resourceGroup().name
 param azureSearchName string 
 
 @description('Optional. The API version of the Azure Search.')
-param azureSearchAPIVersion string = '2021-04-30-Preview'
-
-@description('Required. The name of the resource group where Azure Open AI was deployed previously. Defaults to current resource group.')
-param resourceGroupOpenAI string = resourceGroup().name
+param azureSearchAPIVersion string = '2023-07-01-Preview'
 
 @description('Required. The name of the Azure OpenAI resource deployed previously.')
 param azureOpenAIName string 
 
+@description('Required. The API key of the Azure OpenAI resource deployed previously.')
+@secure()
+param azureOpenAIAPIKey string 
+
 @description('Optional. The model name of the Azure OpenAI.')
-param azureOpenAIModelName string = 'gpt-35-turbo'
+param azureOpenAIModelName string = 'gpt-4'
 
 @description('Optional. The API version of the Azure OpenAI.')
-param azureOpenAIAPIVersion string = '2023-03-15-preview'
+param azureOpenAIAPIVersion string = '2023-05-15'
 
 @description('Optional, defaults to resource group location. The location of the resources.')
 param location string = resourceGroup().location
@@ -52,12 +54,6 @@ param location string = resourceGroup().location
 resource azureSearch 'Microsoft.Search/searchServices@2021-04-01-preview' existing = {
   name: azureSearchName
   scope: resourceGroup(resourceGroupSearch)
-}
-
-// Existing Azure OpenAI resource.
-resource azureOpenAI 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: azureOpenAIName
-  scope: resourceGroup(resourceGroupOpenAI)
 }
 
 // Create a new Linux App Service Plan.
@@ -90,8 +86,8 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           value: botDirectLineChannelKey
         }
         {
-          name: 'DATASOURCE_SAS_TOKEN'
-          value: datasourceSASToken
+          name: 'BLOB_SAS_TOKEN'
+          value: blobSASToken
         }
         {
           name: 'AZURE_SEARCH_ENDPOINT'
@@ -111,7 +107,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_OPENAI_API_KEY'
-          value: azureOpenAI.listKeys().key1
+          value: azureOpenAIAPIKey
         }
         {
           name: 'AZURE_OPENAI_MODEL_NAME'
