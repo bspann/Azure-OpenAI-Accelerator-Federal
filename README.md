@@ -1,22 +1,25 @@
 ![image](https://user-images.githubusercontent.com/113465005/226238596-cc76039e-67c2-46b6-b0bb-35d037ae66e1.png)
 
-# GPT Powered Search Accelerator built for Azure Government Customers 
-# Azure OpenAI + Bot Framework + Langchain + Azure SQL + CosmosDB + Vector Store
+# Azure OpenAI VBD - Microsoft Federal
+## GPT Powered Search Accelerator built for Azure Government
+# Azure OpenAI + Langchain + Vector Database + Microsoft Teams + Azure SQL + CosmosDB + Azure Bot Framework
 
 [![Open in VS Code Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Remote%20-%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/FEDCSUMission/)
 
-Your organization requires a Multi-Channel Smart Chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business data**.
+Your organization requires a Multi-Channel Smart Chatbot and a search engine capable of comprehending diverse types of data scattered across various locations. Additionally, the conversational chatbot should be able to provide answers to inquiries, along with the source and an explanation of how and where the answer was obtained. In other words, you want **private and secured ChatGPT for your organization that can interpret, comprehend, and answer questions about your business and mission data with high accuracy**.
 
-This repo helps you accelerate your solution for building enterprise GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The solution consists of:
+This repo helps you accelerate your solution for building enterprise and mission GPT Virtual Assistant built with Azure Services, with your own data in your own environment. The solution consists of:
 
 1. Backend Bot API built with Bot Framework and exposed to multiple channels (Web Chat, MS Teams, SMS, Email, Slack, etc)
 2. Frontend web application with a Search and a Bot UI.
+3. Jupyter notebooks data scienists and developers can use to get started on building their own use cases.
+4. Data science and development environment using Azure Machine Learning
 
 The repo is made to teach you step-by-step on how to build an OpenAI based Smart Search Engine. Each Notebook builds on top of each other and ends in building the two applications.
 
 ---
 **Prerequisites**
-* Azure subscription
+* Azure commercial subscription and Azure government subscription.
 * Accepted Application to Azure Open AI, including GPT-4 (mandatory)
 * A Resource Group (RG)  needs to be set for this Workshop POC, in the customer Azure tenant
 * A storage account must be set in place in the RG.
@@ -29,13 +32,14 @@ The repo is made to teach you step-by-step on how to build an OpenAI based Smart
 ![Architecture](./images/AOAI-SmartSearch-AzureGov-Architecture.jpg "Architecture")
 
 ## Flow
-1. The user asks a question.
+0. Data scientists and developers use Azure Machine Learning workspace to experiment and develop Azure OpenAI solutions.
+1a/1b. The user asks a question from a web UI or Microsoft Teams.
 2. In the app, an OpenAI LLM uses a clever prompt to determine which source contains the answer to the question.
-3. Four types of sources are available:
-   * 3a. Azure SQL Database - contains COVID-related statistics in the US.
-   * 3b. External Vector DB - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
-      * 3b.1. Uses an LLM (OpenAI) to vectorize the top K document chunks from 3c.
-      * 3b.2. Uses in-memory cosine similarity to get the top N chunks.
+3. Three types of sources are available:
+   * Azure SQL Database - contains COVID-related statistics in the US.
+   * External Vector DB - contains AI-enriched documents from Blob Storage (10k PDFs and 52k articles).
+      * 3b.1. Uses an LLM (OpenAI) to vectorize the top K document chunks.
+      * 3b.2. Uses external vectordb cosine similarity to get the top N chunks.
       * 3b.3. Uses an OpenAI GPT model to craft the response from the Cog Search Engine (3c) by combining the question and the top N chunks.
    * 3c. CSV Tabular File - contains COVID-related statistics in the US.
 4. The app retrieves the result from the source and crafts the answer.
@@ -45,9 +49,9 @@ The repo is made to teach you step-by-step on how to build an OpenAI based Smart
 ---
 ## Demo
 
-https://webapp-frontend-rylu5pcprg6ja.azurewebsites.us/
+https://webapp-frontend-ce5kqagb2csv4.azurewebsites.us/
 
-To open the Bot in GCC-H MS Teams, click [HERE](https://teams.microsoft.us/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)
+To open the Bot in GCC-H MS Teams, click [HERE](https://teams.microsoft.us/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)  You need to have an account and permission created prior to using Teams.
 
 ---
 
@@ -56,7 +60,7 @@ To open the Bot in GCC-H MS Teams, click [HERE](https://teams.microsoft.us/l/cha
    - Implements the AOAI application hosted in Azure Government cloud connecting to Azure OpenAI instance in Azure Commercial cloud, based on the recommended Microsoft architecture.
    - Enables search/chat experience throuhg Microsoft Teams through the [Bot Framework](https://dev.botframework.com/) and [Bot Service](https://azure.microsoft.com/en-us/products/bot-services/).
    - 100% Python.
-   - Incorporates an external vector store (weaviate)
+   - Incorporates an external vector store deployed on Azure Kubernetes Service (Weaviate)
    - Uses [LangChain](https://langchain.readthedocs.io/en/latest/) as a wrapper for interacting with Azure OpenAI , vector stores, constructing prompts and creating agents.
    - Tabular Data Q&A with CSV files and SQL Databases
    - Uses CosmosDB as persistent memory to save user's conversations.
@@ -78,7 +82,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 3. In the Azure Government cloud, create a Resource Group where all the assets of this accelerator are going to be. Use the Azure OpenAI endpoints and keys to configure and deploy the resources in Azure Government.
 4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Cognitive Services, SQL Database, CosmosDB):
 
-[![Deploy To Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FFederalCSUMission%2FAzure-OpenAI-Accelerator-Federal%2Fdavyu_updateAppAzureGov%2Fazuredeploy.json) 
+[![Deploy To Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FFederalCSUMission%2FAzure-OpenAI-Accelerator-Federal%2Fmain%2Fazuredeploy.json) 
 
 **Note**: If you have never created a `Cognitive services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
