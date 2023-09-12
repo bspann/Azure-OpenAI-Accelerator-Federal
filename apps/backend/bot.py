@@ -13,7 +13,7 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 
 #custom libraries that we will use later in the app
-from utils import DocSearchTool, CSVTabularTool, SQLDbTool, ChatGPTTool, BingSearchTool, run_agent
+from utils import DocSearchTool, CSVTabularTool, SQLDbTool, ChatGPTTool, run_agent
 from prompts import WELCOME_MESSAGE, CUSTOM_CHATBOT_PREFIX, CUSTOM_CHATBOT_SUFFIX
 
 from botbuilder.core import ActivityHandler, TurnContext
@@ -65,11 +65,11 @@ class MyBot(ActivityHandler):
         # Initialize our Tools/Experts
         indexes = ["cogsrch-index-files", "cogsrch-index-csv"]
         doc_search = DocSearchTool(llm=llm, indexes=indexes, k=10, chunks_limit=100, similarity_k=5, callback_manager=cb_manager, return_direct=True)
-        www_search = BingSearchTool(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
+        #www_search = BingSearchTool(llm=llm, k=5, callback_manager=cb_manager, return_direct=True)
         sql_search = SQLDbTool(llm=llm, k=10, callback_manager=cb_manager, return_direct=True)
         chatgpt_search = ChatGPTTool(llm=llm, callback_manager=cb_manager, return_direct=True)
 
-        tools = [www_search, sql_search, doc_search, chatgpt_search]
+        tools = [sql_search, doc_search, chatgpt_search] # www_search
 
         # Set main Agent
         llm_a = AzureChatOpenAI(deployment_name=self.MODEL_DEPLOYMENT_NAME, temperature=0.5, max_tokens=500)
