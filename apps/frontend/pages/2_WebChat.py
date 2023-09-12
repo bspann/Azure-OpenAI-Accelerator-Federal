@@ -21,7 +21,6 @@ with st.sidebar:
 This Chatbot is hosted in an independent Backend Azure Web App and was created using the Bot Framework SDK.
 It has access to the following tools/pluggins:
 
-- Bing Search (***use @bing in your question***)
 - ChatGPT for common knowledge (***use @chatgpt in your question***)
 - Azure SQL for covid statistics data (***use @covidstats in your question***)
 - Azure Search for corporate knowledge - Arxiv papers and Covid Articles (***use @docsearch in your question***)
@@ -31,7 +30,6 @@ Note: If you don't use any of the tool names beginning with @, the bot will try 
 Example questions:
 
 - Hello, my name is Bob, what's yours?
-- @bing, What's the main economic news of today?
 - @chatgpt, How do I cook a chocolate cake?
 - @docsearch, What medicine reduces inflammation in the lungs?
 - @docsearch, Why Covid doesn't affect kids that much compared to adults?
@@ -40,7 +38,6 @@ Example questions:
 - @docsearch, List the authors that talk about Boosting Algorithms
 - @docsearch, How does random forest work?
 - @chatgpt, how do I fix this error: aiohttp.web_exceptions.HTTPNotFound: Not Found
-- @bing, what movies are showing tonight in Seattle?
 - @docsearch, What are the main risk factors for Covid-19?
 - Please tell me a joke
     """)

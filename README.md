@@ -82,7 +82,7 @@ Note: (Pre-requisite) You need to have an Azure OpenAI service already created
 3. In the Azure Government cloud, create a Resource Group where all the assets of this accelerator are going to be. Use the Azure OpenAI endpoints and keys to configure and deploy the resources in Azure Government.
 4. ClICK BELOW to create all the Azure Infrastructure needed to run the Notebooks (Cognitive Services, SQL Database, CosmosDB):
 
-[![Deploy To Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FFederalCSUMission%2FAzure-OpenAI-Accelerator-Federal%2Fmain%2Fazuredeploy.json) 
+[![Deploy To Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FFederalCSUMission%2FAzure-OpenAI-Accelerator-Federal%2Fmain%2Fazuredeploy.json) 
 
 **Note**: If you have never created a `Cognitive services Multi-Service account` before, please create one manually in the azure portal to read and accept the Responsible AI terms. Once this is deployed, delete this and then use the above deployment button.
 
