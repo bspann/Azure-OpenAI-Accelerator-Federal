@@ -145,6 +145,33 @@
       "metadata": {
         "description": "Optional, defaults to resource group location. The location of the resources."
       }
+    },
+    "clusterName": {
+      "type": "string",
+      "defaultValue": "[format('aks-{0}', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "Optional.  The name of azure kubernetes cluster"
+      }
+    },
+    "dnsPrefix": {
+      "type": "string",
+      "defaultValue": "aoaiaks",
+      "metadata": {
+        "description": "Optional DNS prefix to use with hosted Kubernetes API server FQDN."
+      }
+    },
+    "aksAdminUsername": {
+      "type": "string",
+      "defaultValue": "aksadmin",
+      "metadata": {
+        "description": "Required.  Admin username of azure kubernetes cluster"
+      }
+    },
+    "sshRSAPublicKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Configure aks with the SSH RSA public key string. Your key should include three parts, for example 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'"
+      }
     }
   },
   "variables": {
@@ -313,6 +340,38 @@
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('blobStorageAccountName'), 'default')]"
       ]
+    },
+    {
+      "type": "Microsoft.ContainerService/managedClusters",
+      "apiVersion": "2022-05-02-preview",
+      "name": "[parameters('clusterName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "dnsPrefix": "[parameters('dnsPrefix')]",
+        "agentPoolProfiles": [
+          {
+            "name": "agentpool",
+            "osDiskSizeGB": 128,
+            "count": 1,
+            "vmSize": "Standard_DS2_v2",
+            "osType": "Linux",
+            "mode": "System"
+          }
+        ],
+        "linuxProfile": {
+          "adminUsername": "[parameters('aksAdminUsername')]",
+          "ssh": {
+            "publicKeys": [
+              {
+                "keyData": "[parameters('sshRSAPublicKey')]"
+              }
+            ]
+          }
+        }
+      }
     }
   ]
 }
