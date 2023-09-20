@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appId": {
+            "value": ""
+        },
+        "appPassword": {
+            "value": ""
+        },        
+        "botServiceName": {
+            "value": ""
+        },
+        "botDirectLineChannelKey": {
+            "value": ""
+        },
+        "azureSearchName": {
+            "value": ""
+        },
+        "azureSearchAPIVersion": {
+            "value": "2021-04-30-Preview"
+        },
+        "blobSASToken": {
+            "value": ""
+        },
+        "azureOpenAIName": {
+            "value": ""
+        },
+        "azureOpenAIAPIKey": {
+            "value": ""
+        },
+        "azureOpenAIModelName": {
+            "value": "gpt-4"
+        },
+        "azureOpenAIAPIVersion": {
+            "value": "2023-03-15-preview"
+        },
+
+        "SQLServerDatabase": {
+            "value": ""
+        },
+        "SQLServerUsername": {
+            "value": ""
+        },
+        "SQLServerPassword": {
+            "value": ""
+        },
+        "cosmosDBAccountName": {
+            "value": ""
+        },
+         "cosmosDBContainerName": {
+            "value": ""
+        }
+    }
+}
+ 
