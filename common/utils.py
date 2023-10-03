@@ -5,6 +5,8 @@ from io import BytesIO
 from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
 import requests
 
+from urllib.parse import urlparse
+
 from collections import OrderedDict
 import base64
 
@@ -15,6 +17,9 @@ import time
 from pypdf import PdfReader, PdfWriter
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
+
+from azure.identity import DefaultAzureCredential, AzureCliCredential
+from azure.mgmt.resource import ResourceManagementClient
 
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.docstore.document import Document
@@ -45,15 +50,18 @@ from langchain.agents import create_sql_agent
 from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from langchain.callbacks.base import BaseCallbackManager
 
+# removed reference to 'DOCSEARCH_PROMPT_PREFIX' from import statement(s) below
+# Does not currently exists in prompts.py
+
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX )
 except Exception as e:
     print(e)
     from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX )
 
 
 def text_to_base64(text):
@@ -463,14 +471,23 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
 # function to verify if Semantic Search is available is Cognitive Search instance
 def semanticEnabled( searchService, azSubscription, azResourceGroup ) :
 
+    # get name of Search Service, in case endpoint name is passed
+    if ( searchService[ : 8 ] ).upper() == "HTTPS://" :
+
+        parseService = urlparse( searchService )
+
+        urlSplit = ( parseService.hostname ).split( "." )
+
+        searchName = urlSplit[ 0 ]
+
+    else :
+
+        searchName = searchService
+
     loginUrl = "https://login.microsoftonline.us/"
     mgmtUrl = "https://management.usgovcloudapi.net/"
     apiVersion = "2022-09-01"
     csApiVersion = "2021-06-06-Preview"
-
-    # searchService = os.environ[ "AZURE_SEARCH_NAME" ] # update this value in env file
-    # azSubscription = os.environ[ "AZ_SUBSCRIPTION_ID" ]
-    # azResourceGroup = os.environ[ "AZ_RESOURCE_GROUP" ]
 
     # variable to track if Semantic Search is enabled or disabled - disabled by default ( disabled = 0, enabled = 1 )
     semanticStatus = 0
@@ -486,7 +503,7 @@ def semanticEnabled( searchService, azSubscription, azResourceGroup ) :
     scopeurl = mgmtUrl +  ".default"
     resourceClient = ResourceManagementClient( currCredential, azSubscription, apiVersion, mgmtUrl, credential_scopes = [ scopeurl ] )
 
-    resourceInfo = resourceClient.resources.get( azResourceGroup, "Microsoft.Search", "", "searchServices", searchService, csApiVersion )
+    resourceInfo = resourceClient.resources.get( azResourceGroup, "Microsoft.Search", "", "searchServices", searchName, csApiVersion )
 
     propSemantic = resourceInfo.properties[ "semanticSearch" ]
 
