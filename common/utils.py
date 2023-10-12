@@ -5,8 +5,6 @@ from io import BytesIO
 from typing import Any, Dict, List, Optional, Awaitable, Callable, Tuple, Type, Union
 import requests
 
-from urllib.parse import urlparse
-
 from collections import OrderedDict
 import base64
 
@@ -17,9 +15,6 @@ import time
 from pypdf import PdfReader, PdfWriter
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
-
-from azure.identity import DefaultAzureCredential, AzureCliCredential
-from azure.mgmt.resource import ResourceManagementClient
 
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.docstore.document import Document
@@ -50,18 +45,28 @@ from langchain.agents import create_sql_agent
 from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from langchain.callbacks.base import BaseCallbackManager
 
-# removed reference to 'DOCSEARCH_PROMPT_PREFIX' from import statement(s) below
-# Does not currently exists in prompts.py
-
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX )
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
 except Exception as e:
     print(e)
     from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
+						  
+except Exception as e:
+    print(e)					  
+    from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
                           MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX )
+						  
+    from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX )						  
+						  
+except Exception as e:
+    print(e)							  
 
 
 def text_to_base64(text):
@@ -314,28 +319,28 @@ def get_search_results(query: str, indexes: list,
     ordered_content = OrderedDict()
     
     for index,search_results in agg_search_results.items():
-        if 'value' in search_results:
-            for result in search_results['value']:
-                if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
-                    content[result['id']]={
-                                            "title": result['title'], 
-                                            "name": result['name'], 
-                                            "location": result['location'] + sas_token if result['location'] else "",
-                                            "caption": result['@search.captions'][0]['text'],
-                                            "index": index
-                                        }
-                    if vector_search:
-                        content[result['id']]["chunk"]= result['chunk']
-                        content[result['id']]["score"]= result['@search.score'] # Uses the Hybrid RRF score
+        if 'value' in search_results:									 
+			for result in search_results['value']:
+				if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
+					content[result['id']]={
+											"title": result['title'], 
+											"name": result['name'], 
+											"location": result['location'] + sas_token if result['location'] else "",
+											"caption": result['@search.captions'][0]['text'],
+											"index": index
+										}
+					if vector_search:
+						content[result['id']]["chunk"]= result['chunk']
+						content[result['id']]["score"]= result['@search.score'] # Uses the Hybrid RRF score
+				  
+					else:
+						content[result['id']]["chunks"]= result['chunks']
+						content[result['id']]["language"]= result['language']
+						content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
+						content[result['id']]["vectorized"]= result['vectorized']
                 
-                    else:
-                        content[result['id']]["chunks"]= result['chunks']
-                        content[result['id']]["language"]= result['language']
-                        content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
-                        content[result['id']]["vectorized"]= result['vectorized']
         else:
-            print("'value' is not a valid key for search_results -- processing skipped")
-                
+            print("'value' is not a valid key for search_results -- processing skipped")						 
     # After results have been filtered, sort and add the top k to the ordered_content
     if vector_search:
         topk = similarity_k
@@ -454,20 +459,22 @@ def get_answer(llm: AzureChatOpenAI,
 def run_agent(question:str, agent_chain: AgentExecutor) -> str:
     """Function to run the brain agent and deal with potential parsing errors"""
     
-    try:
-        return agent_chain.run(input=question)
+    for i in range(5):
+        try:
+            response = agent_chain.run(input=question)
+            break
+        except OutputParserException as e:
+            # If the agent has a parsing error, we use OpenAI model again to reformat the error and give a good answer
+            chatgpt_chain = LLMChain(
+                    llm=agent_chain.agent.llm_chain.llm, 
+                        prompt=PromptTemplate(input_variables=["error"],template='Remove any json formating from the below text, also remove any portion that says someting similar this "Could not parse LLM output: ". Reformat your response in beautiful Markdown. Just give me the reformated text, nothing else.\n Text: {error}'), 
+                    verbose=False
+                )
+
+            response = chatgpt_chain.run(str(e))
+            continue
     
-    except OutputParserException as e:
-        # If the agent has a parsing error, we use OpenAI model again to reformat the error and give a good answer
-        chatgpt_chain = LLMChain(
-                llm=agent_chain.agent.llm_chain.llm, 
-                    prompt=PromptTemplate(input_variables=["error"],template='Remove any json formating from the below text, also remove any portion that says someting similar this "Could not parse LLM output: ". Reformat your response in beautiful Markdown. Just give me the reformated text, nothing else.\n Text: {error}'), 
-                verbose=False
-            )
-
-        response = chatgpt_chain.run(str(e))
-        return response
-
+    return response
 # function to verify if Semantic Search is available is Cognitive Search instance
 def semanticEnabled( searchService, azSubscription, azResourceGroup ) :
 
@@ -518,6 +525,7 @@ def semanticEnabled( searchService, azSubscription, azResourceGroup ) :
     return semanticStatus
 
 # print( "Semantic Status: ", str( semanticStatus ) )
+    
     
 
 ######## TOOL CLASSES #####################################
