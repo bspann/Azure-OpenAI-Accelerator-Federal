@@ -320,24 +320,24 @@ def get_search_results(query: str, indexes: list,
     
     for index,search_results in agg_search_results.items():
         if 'value' in search_results:									 
-			for result in search_results['value']:
-				if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
-					content[result['id']]={
+            for result in search_results['value']:
+                if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
+                    content[result['id']]={
 											"title": result['title'], 
 											"name": result['name'], 
 											"location": result['location'] + sas_token if result['location'] else "",
 											"caption": result['@search.captions'][0]['text'],
 											"index": index
 										}
-					if vector_search:
-						content[result['id']]["chunk"]= result['chunk']
-						content[result['id']]["score"]= result['@search.score'] # Uses the Hybrid RRF score
+                    if vector_search:
+                        content[result['id']]["chunk"]= result['chunk']
+                        content[result['id']]["score"]= result['@search.score'] # Uses the Hybrid RRF score
 				  
-					else:
-						content[result['id']]["chunks"]= result['chunks']
-						content[result['id']]["language"]= result['language']
-						content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
-						content[result['id']]["vectorized"]= result['vectorized']
+                    else:
+                        content[result['id']]["chunks"]= result['chunks']
+                        content[result['id']]["language"]= result['language']
+                        content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
+                        content[result['id']]["vectorized"]= result['vectorized']
                 
         else:
             print("'value' is not a valid key for search_results -- processing skipped")						 
