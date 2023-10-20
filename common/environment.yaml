@@ -1,0 +1,29 @@
+name: azureml_py310_sdkv2
+channels:
+  - default
+  - main
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - anaconda
+  - pip
+  - openai
+  - Pillow
+  - tenacity
+  - SQLAlchemy<2.0.0
+  - pyodbc
+  - tabulate
+  - streamlit
+  - python-dotenv
+  - pip:
+    - azure-ai-formrecognizer
+    - azure-mgmt-cognitiveservices==13.3.0
+    - azure-mgmt-search
+    - langchain==0.0.230
+    - azure-identity
+    - pypdf
+    - azure-mgmt-resource
+    - faiss-cpu
+    - azure-cosmos==4.5.1
+    - docx2txt
+    - tiktoken
