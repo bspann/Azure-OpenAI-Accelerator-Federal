@@ -9,8 +9,8 @@ tenacity
 SQLAlchemy<2.0.0
 pyodbc
 tabulate
-azure-cosmos
-botbuilder-integration-aiohttp>=4.14.4
+azure-cosmos==4.5.1
+# botbuilder-integration-aiohttp>=4.14.4
 streamlit
 python-dotenv
 azure-ai-formrecognizer
