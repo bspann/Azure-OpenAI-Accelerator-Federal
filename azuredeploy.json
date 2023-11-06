@@ -9,6 +9,10 @@
     }
   },
   "parameters": {
+    "deployAzureSearch": {
+      "type": "bool",
+      "defaultValue": false 
+    },
     "azureSearchName": {
       "type": "string",
       "defaultValue": "[format('cog-search-{0}', uniqueString(resourceGroup().id))]",
@@ -146,6 +150,10 @@
         "description": "Optional, defaults to resource group location. The location of the resources."
       }
     },
+    "deployAKS": {
+      "type": "bool",
+      "defaultValue": false 
+    },
     "clusterName": {
       "type": "string",
       "defaultValue": "[format('aks-{0}', uniqueString(resourceGroup().id))]",
@@ -179,6 +187,7 @@
   },
   "resources": [
     {
+      "condition": "[parameters('deployAzureSearch')]",      
       "type": "Microsoft.Search/searchServices",
       "apiVersion": "2021-04-01-preview",
       "name": "[parameters('azureSearchName')]",
@@ -342,6 +351,7 @@
       ]
     },
     {
+      "condition": "[parameters('deployAKS')]",
       "type": "Microsoft.ContainerService/managedClusters",
       "apiVersion": "2022-05-02-preview",
       "name": "[parameters('clusterName')]",
