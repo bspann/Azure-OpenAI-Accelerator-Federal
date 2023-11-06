@@ -13,6 +13,12 @@
         },
         "sshRSAPublicKey": {
             "value": ""
+        },
+        "deployAKS": {
+            "value": false
+        },
+        "deployAzureSearch": {
+            "value": false
         }
     }
 }
