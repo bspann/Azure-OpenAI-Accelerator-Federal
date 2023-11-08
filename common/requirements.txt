@@ -1,20 +1,16 @@
-langchain==0.0.230
+langchain==0.0.316
 faiss-cpu
-openai
+openai==0.28.1
 tiktoken
 docx2txt
-Pillow
+pillow
 pypdf
 tenacity
-SQLAlchemy<2.0.0
+sqlalchemy<2.0.0
 pyodbc
 tabulate
-azure-cosmos==4.5.1
-# botbuilder-integration-aiohttp>=4.14.4
+azure-cosmos
+botbuilder-integration-aiohttp>=4.14.4
 streamlit
 python-dotenv
 azure-ai-formrecognizer
-azure-mgmt-resource
-azure-mgmt-search
-azure-identity
-azure-mgmt-cognitiveservices==13.3.0
