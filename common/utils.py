@@ -33,7 +33,6 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.tools import BaseTool
 from langchain.prompts import PromptTemplate
-from openai.error import AuthenticationError
 from langchain.docstore.document import Document
 from pypdf import PdfReader
 from sqlalchemy.engine.url import URL
