@@ -1,6 +1,8 @@
 langchain==0.0.316
-faiss-cpu
+langchain-experimental==0.0.42
 openai==0.28.1
+botbuilder-integration-aiohttp>=4.14.4
+faiss-cpu
 tiktoken
 docx2txt
 pillow
@@ -10,7 +12,8 @@ sqlalchemy<2.0.0
 pyodbc
 tabulate
 azure-cosmos
-botbuilder-integration-aiohttp>=4.14.4
 streamlit
 python-dotenv
 azure-ai-formrecognizer
+azure-storage-blob
+rarfile

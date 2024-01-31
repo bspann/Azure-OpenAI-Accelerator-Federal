@@ -1,13 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "metadata": {
-    "_generator": {
-      "name": "bicep",
-      "version": "0.20.4.51522",
-      "templateHash": "10291947530786187860"
-    }
-  },
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",  "contentVersion": "1.0.0.0",
   "parameters": {
     "webAppName": {
       "type": "string",
@@ -55,18 +47,22 @@
         "description": "Required. The SAS token for the Azure Storage Account hosting your data"
       }
     },
-    "resourceGroupSearch": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().name]",
-      "metadata": {
-        "description": "Optional. The name of the resource group where the resources (Azure Search etc.) where deployed previously. Defaults to current resource group."
-      }
-    },
     "azureSearchName": {
       "type": "string",
       "metadata": {
         "description": "Required. The name of the Azure Search service deployed previously."
       }
+    },
+    "azureSearchKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Required. The name of the Azure Search service deployed previously."
+      }
+    },
+    "searchCloudType": {
+      "type": "string",
+      "defaultValue": "Azure",
+      "allowedValues": ["Azure", "AzureGovernment"]
     },
     "azureSearchAPIVersion": {
       "type": "string",
@@ -109,7 +105,13 @@
       }
     }
   },
-  "resources": [
+  "variables": {
+    "searchendpoint_commercial": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]",
+    "searchendpoint_government": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]",
+    "searchendpoint": "[if(equals(parameters('searchCloudType'), 'AzureGovernment'), variables('searchendpoint_government'), variables('searchendpoint_commercial'))]"
+  },
+  "resources":
+  [
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2022-09-01",
@@ -146,11 +148,11 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]"
+              "value": "[variables('searchendpoint')]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "cYXHCUXTO54SYaWjqxD56BaTwn0uBE3k0vn0OVDY28AzSeC9kAvJ"
+              "value": "[parameters('azureSearchKey')]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
@@ -196,5 +198,11 @@
         "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
       ]
     }
-  ]
+  ], 
+  "outputs": {
+    "searchendpoint": {
+      "type": "string",
+      "value": "[variables('searchendpoint')]"
+    }
+  }
 }
