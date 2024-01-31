@@ -3,46 +3,55 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "appId": {
-            "value": ""
+            "value": "2bf264c9-edf6-440a-94ff-a7a762c3a92c"
         },
         "appPassword": {
-            "value": ""
+            "value": "oWzdM_Hwb~9R_UyRHSs~hREjG1.8e7~N4s"
         },        
         "azureSearchName": {
-            "value": ""
+            "value": "gptkb-dyuinno"
         },
         "azureSearchAPIVersion": {
             "value": "2021-04-30-Preview"
         },
+        "azureSearchKey": {
+            "value": "8gqJGLQN1Prl4EUG9h5uJRGhLDb75P6CfjYvrez59mAzSeD405RE"
+        },
+        "resourceGroupSearch": {
+            "value": "rg-azure-search-openai-demo-dev"
+        },
         "azureOpenAIName": {
-            "value": ""
+            "value": "aoai-canada-federal"
         },
         "azureOpenAIAPIKey": {
-            "value": ""
+            "value": "e03df41805a044eb85e39e6b0e00d5c7"
         },
         "azureOpenAIModelName": {
-            "value": "gpt-4"
+            "value": "gpt-4-32k"
         },
         "azureOpenAIAPIVersion": {
             "value": "2023-03-15-preview"
         },
         "SQLServerName": {
-            "value": ""
+            "value": "sql-server-a3pkv5rdhszks"
         },
         "SQLServerDatabase": {
-            "value": ""
+            "value": "SampleDB"
         },
         "SQLServerUsername": {
-            "value": ""
+            "value": "aoaiadmin"
         },
         "SQLServerPassword": {
-            "value": ""
+            "value": "Yakuyaku1234!"
         },
         "cosmosDBAccountName": {
-            "value": ""
+            "value": "cosmosdb-account-a3pkv5rdhszks"
         },
          "cosmosDBContainerName": {
-            "value": ""
+            "value": "cosmosdb-container-a3pkv5rdhszks"
+        }, 
+        "blobSASToken": {
+            "value": "?sv=2022-11-02&ss=bf&srt=sco&sp=rltfx&se=2024-10-02T01:02:07Z&st=2023-08-03T17:02:07Z&spr=https&sig=gLxStXFSY6X29OPpPDpBEhoQDdtJNDrMVExNYJ%2BhmBQ%3D"
         }
     }
 }

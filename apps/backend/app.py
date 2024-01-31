@@ -14,18 +14,19 @@ from botbuilder.core import (
     ShowTypingMiddleware,
 )
 from botbuilder.core.integration import aiohttp_error_middleware
-# fix
-from botbuilder.integration.aiohttp import CloudAdapter, ConfigurationBotFrameworkAuthentication
 from botbuilder.schema import Activity, ActivityTypes
+# Tracy's fix
+#from botbuilder.integration.aiohttp import CloudAdapter, ConfigurationBotFrameworkAuthentication
+
 
 #Required for Azure Gov
-#from botframework.connector.auth._government_cloud_bot_framework_authentication import(   
-#    GovernmentConstants                
-#)
+from botframework.connector.auth._government_cloud_bot_framework_authentication import(   
+    GovernmentConstants                
+)
 #Required for Azure Gov
-#from botframework.connector.auth.simple_channel_provider import(
-#    SimpleChannelProvider
-#)
+from botframework.connector.auth.simple_channel_provider import(
+    SimpleChannelProvider
+)
 
 from bot import MyBot
 from config import DefaultConfig
@@ -37,19 +38,21 @@ CONFIG = DefaultConfig()
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
+
+# Tracy's fix
 # Required for Azure Gov: channel_provider
-ADAPTER = CloudAdapter(ConfigurationBotFrameworkAuthentication(CONFIG))
-ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
+#ADAPTER = CloudAdapter(ConfigurationBotFrameworkAuthentication(CONFIG))
+#ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
 
 #Required for Azure Gov
-#CHANNEL_SERVICE = SimpleChannelProvider(GovernmentConstants.CHANNEL_SERVICE)  #creating simplechannelProvider jebrook
+CHANNEL_SERVICE = SimpleChannelProvider(GovernmentConstants.CHANNEL_SERVICE)  #creating simplechannelProvider jebrook
 
 # Create adapter.
 # See https://aka.ms/about-bot-adapter to learn more about how bots work.
 # Required for Azure Gov: channel_provider
-#SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD, channel_provider=CHANNEL_SERVICE)
-#ADAPTER = BotFrameworkAdapter(SETTINGS)
-#ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
+SETTINGS = BotFrameworkAdapterSettings(CONFIG.APP_ID, CONFIG.APP_PASSWORD, channel_provider=CHANNEL_SERVICE)
+ADAPTER = BotFrameworkAdapter(SETTINGS)
+ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
 
 
 # Catch-all for errors.
@@ -96,9 +99,9 @@ async def messages(req: Request) -> Response:
 
     activity = Activity().deserialize(body)
     auth_header = req.headers["Authorization"] if "Authorization" in req.headers else ""
-
+    # Tracy's fix
     #response = await ADAPTER.process_activity(auth_header, activity, BOT.on_turn)
-    response = await ADAPTER.process_activity(auth_header, activity, BOT.on_turn)
+    response = await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
     if response:
         return json_response(data=response.body, status=response.status)
     return Response(status=201)
