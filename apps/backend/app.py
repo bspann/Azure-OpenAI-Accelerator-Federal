@@ -15,6 +15,9 @@ from botbuilder.core import (
 )
 from botbuilder.core.integration import aiohttp_error_middleware
 from botbuilder.schema import Activity, ActivityTypes
+# Tracy's fix
+#from botbuilder.integration.aiohttp import CloudAdapter, ConfigurationBotFrameworkAuthentication
+
 
 #Required for Azure Gov
 from botframework.connector.auth._government_cloud_bot_framework_authentication import(   
@@ -32,6 +35,14 @@ import streamlit as st
 import logging
 
 CONFIG = DefaultConfig()
+
+# Create adapter.
+# See https://aka.ms/about-bot-adapter to learn more about how bots work.
+
+# Tracy's fix
+# Required for Azure Gov: channel_provider
+#ADAPTER = CloudAdapter(ConfigurationBotFrameworkAuthentication(CONFIG))
+#ADAPTER.use(ShowTypingMiddleware(delay=1, period=3.0))
 
 #Required for Azure Gov
 CHANNEL_SERVICE = SimpleChannelProvider(GovernmentConstants.CHANNEL_SERVICE)  #creating simplechannelProvider jebrook
@@ -88,7 +99,8 @@ async def messages(req: Request) -> Response:
 
     activity = Activity().deserialize(body)
     auth_header = req.headers["Authorization"] if "Authorization" in req.headers else ""
-
+    # Tracy's fix
+    #response = await ADAPTER.process_activity(auth_header, activity, BOT.on_turn)
     response = await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
     if response:
         return json_response(data=response.body, status=response.status)

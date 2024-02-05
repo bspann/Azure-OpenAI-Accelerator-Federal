@@ -49,7 +49,7 @@ The repo is made to teach you step-by-step on how to build an OpenAI based Smart
 ---
 ## Demo
 
-https://webapp-frontend-ce5kqagb2csv4.azurewebsites.us/
+https://webapp-frontend-a3pkv5rdhszks.azurewebsites.us/
 
 To open the Bot in GCC-H MS Teams, click [HERE](https://teams.microsoft.us/l/chat/0/0?users=28:5d583679-8196-4673-9d77-c294c010bca5)  You need to have an account and permission created prior to using Teams.
 

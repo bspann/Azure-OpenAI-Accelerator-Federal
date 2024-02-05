@@ -10,3 +10,7 @@ common/__pycache__/
 *.amltemp
 data/
 credentials.env
+apps/frontend/*.params.json
+apps/frontend/*.zip
+apps/backend/*.params.json
+apps/backend/*.zip

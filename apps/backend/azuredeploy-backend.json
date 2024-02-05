@@ -47,6 +47,12 @@
         "description": "Optional. The API version for the Azure Search service."
       }
     },
+    "azureSearchKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Optional. Azure Search Key.  Use it when Azure Search is deployed in Commercial cloud"
+      }
+    },
     "azureOpenAIName": {
       "type": "string",
       "metadata": {
@@ -220,11 +226,11 @@
             },
             {
               "name": "AZURE_SEARCH_ENDPOINT",
-              "value": "[format('https://{0}.search.azure.us', parameters('azureSearchName'))]"
+              "value": "[format('https://{0}.search.windows.net', parameters('azureSearchName'))]"
             },
             {
               "name": "AZURE_SEARCH_KEY",
-              "value": "[listAdminKeys(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupSearch')), 'Microsoft.Search/searchServices', parameters('azureSearchName')), '2021-04-01-preview').primaryKey]"
+              "value": "[parameters('azureSearchKey')]"
             },
             {
               "name": "AZURE_SEARCH_API_VERSION",
