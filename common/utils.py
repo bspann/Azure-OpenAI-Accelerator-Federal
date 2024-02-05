@@ -12,12 +12,15 @@ import docx2txt
 import tiktoken
 import html
 import time
-
+from time import sleep
+from typing import List, Tuple
 from pypdf import PdfReader, PdfWriter
+from dataclasses import dataclass
+from sqlalchemy.engine.url import URL
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.credentials import AzureKeyCredential
 
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import AzureOpenAIEmbeddings
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
 from langchain.chat_models import AzureChatOpenAI
@@ -29,44 +32,31 @@ from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 #from langchain.agents import create_csv_agent
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from langchain.tools import BaseTool
 from langchain.prompts import PromptTemplate
-from langchain.docstore.document import Document
-from pypdf import PdfReader
-from sqlalchemy.engine.url import URL
 from langchain.sql_database import SQLDatabase
 from langchain.agents import AgentExecutor, initialize_agent, AgentType
-from langchain.tools import BaseTool
-from langchain.utilities import BingSearchAPIWrapper
 from langchain.agents import create_sql_agent
 from langchain.agents.agent_toolkits import SQLDatabaseToolkit
 from langchain.callbacks.base import BaseCallbackManager
+from langchain.requests import RequestsWrapper
+from langchain.chains import APIChain
+from langchain.agents.agent_toolkits.openapi.spec import reduce_openapi_spec
+from langchain.utils.json_schema import dereference_refs
+
+
 
 try:
     from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, DOCSEARCH_PROMPT_PREFIX, APISEARCH_PROMPT_PREFIX)
 except Exception as e:
     print(e)
-
-    if "cannot import name 'DOCSEARCH_PROMPT_PREFIX'" in str( e ) :
-
-        from .prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
+    from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
                           CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX )
+                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, DOCSEARCH_PROMPT_PREFIX, APISEARCH_PROMPT_PREFIX)
 
-    else :
-
-        from prompts import (COMBINE_QUESTION_PROMPT, COMBINE_PROMPT, COMBINE_CHAT_PROMPT,
-                          CSV_PROMPT_PREFIX, CSV_PROMPT_SUFFIX, MSSQL_PROMPT, MSSQL_AGENT_PREFIX, 
-                          MSSQL_AGENT_FORMAT_INSTRUCTIONS, CHATGPT_PROMPT, BING_PROMPT_PREFIX, DOCSEARCH_PROMPT_PREFIX)
-
-except Exception as e:
-    print(e)	
 
 def text_to_base64(text):
     # Convert text to bytes using UTF-8 encoding
@@ -216,7 +206,7 @@ def embed_docs_faiss(docs: List[Document], chunks_limit: int=100, verbose: bool 
  
     # Select the Embedder model'
     if verbose: print("Number of chunks:",len(docs))
-    embedder = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1) 
+    embedder = AzureOpenAIEmbeddings(model="text-embedding-ada-002", skip_empty=True) 
     
     if len(docs) > chunks_limit:
         docs = docs[:chunks_limit]
@@ -276,6 +266,75 @@ def num_tokens_from_docs(docs: List[Document]) -> int:
     return num_tokens
 
 
+@dataclass(frozen=True)
+class ReducedOpenAPISpec:
+    """A reduced OpenAPI spec.
+
+    This is a quick and dirty representation for OpenAPI specs.
+
+    Attributes:
+        servers: The servers in the spec.
+        description: The description of the spec.
+        endpoints: The endpoints in the spec.
+    """
+
+    servers: List[dict]
+    description: str
+    endpoints: List[Tuple[str, str, dict]]
+
+
+def reduce_openapi_spec(spec: dict, dereference: bool = True) -> ReducedOpenAPISpec:
+    """Simplify/distill/minify a spec somehow.
+
+    I want a smaller target for retrieval and (more importantly)
+    I want smaller results from retrieval.
+    I was hoping https://openapi.tools/ would have some useful bits
+    to this end, but doesn't seem so.
+    """
+    # 1. Consider only get, post, patch, put, delete endpoints.
+    endpoints = [
+        (f"{operation_name.upper()} {route}", docs.get("description"), docs)
+        for route, operation in spec["paths"].items()
+        for operation_name, docs in operation.items()
+        if operation_name in ["get", "post", "patch", "put", "delete"]
+    ]
+
+    # 2. Replace any refs so that complete docs are retrieved.
+    # Note: probably want to do this post-retrieval, it blows up the size of the spec.
+    if dereference:
+        endpoints = [
+            (name, description, dereference_refs(docs, full_schema=spec))
+            for name, description, docs in endpoints
+        ]
+
+    # 3. Strip docs down to required request args + happy path response.
+    def reduce_endpoint_docs(docs: dict) -> dict:
+        out = {}
+        if docs.get("description"):
+            out["description"] = docs.get("description")
+        if docs.get("parameters"):
+            out["parameters"] = [
+                parameter
+                for parameter in docs.get("parameters", [])
+                if parameter.get("required")
+            ]
+        if "200" in docs["responses"]:
+            out["responses"] = docs["responses"]["200"]
+        if docs.get("requestBody"):
+            out["requestBody"] = docs.get("requestBody")
+        return out
+
+    endpoints = [
+        (name, description, reduce_endpoint_docs(docs))
+        for name, description, docs in endpoints
+    ]
+    return ReducedOpenAPISpec(
+        servers=spec["servers"] if "servers" in spec.items() else [{"url": "https://" + spec["host"]}],
+        description=spec["info"].get("description", ""),
+        endpoints=endpoints,
+    )
+
+
 def get_search_results(query: str, indexes: list, 
                        k: int = 5,
                        reranker_threshold: int = 1,
@@ -305,41 +364,38 @@ def get_search_results(query: str, indexes: list,
             search_payload["vectors"]= [{"value": query_vector, "fields": "chunkVector","k": k}]
             search_payload["select"]= "id, title, chunk, name, location"
         else:
-            search_payload["select"]= "id, title, chunks, language, name, location, vectorized"
+            search_payload["select"]= "id, title, chunks, name, location, vectorized"
         
-
+        
         resp = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + index + "/docs/search",
                          data=json.dumps(search_payload), headers=headers, params=params)
 
         search_results = resp.json()
+        print(search_results)
         agg_search_results[index] = search_results
     
     content = dict()
     ordered_content = OrderedDict()
     
     for index,search_results in agg_search_results.items():
-        if 'value' in search_results:									 
-            for result in search_results['value']:
-                if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
-                    content[result['id']]={
-											"title": result['title'], 
-											"name": result['name'], 
-											"location": result['location'] + sas_token if result['location'] else "",
-											"caption": result['@search.captions'][0]['text'],
-											"index": index
-										}
-                    if vector_search:
-                        content[result['id']]["chunk"]= result['chunk']
-                        content[result['id']]["score"]= result['@search.score'] # Uses the Hybrid RRF score
-				  
-                    else:
-                        content[result['id']]["chunks"]= result['chunks']
-                        content[result['id']]["language"]= result['language']
-                        content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
-                        content[result['id']]["vectorized"]= result['vectorized']
+        for result in search_results['value']:
+            if result['@search.rerankerScore'] > reranker_threshold: # Show results that are at least N% of the max possible score=4
+                content[result['id']]={
+                                        "title": result['title'], 
+                                        "name": result['name'], 
+                                        "location": result['location'] + sas_token if result['location'] else "",
+                                        "caption": result['@search.captions'][0]['text'],
+                                        "index": index
+                                    }
+                if vector_search:
+                    content[result['id']]["chunk"]= result['chunk']
+                    content[result['id']]["score"]= result['@search.score'] # Uses the Hybrid RRF score
+              
+                else:
+                    content[result['id']]["chunks"]= result['chunks']
+                    content[result['id']]["score"]= result['@search.rerankerScore'] # Uses the reranker score
+                    content[result['id']]["vectorized"]= result['vectorized']
                 
-        else:
-            print("'value' is not a valid key for search_results -- processing skipped")						 
     # After results have been filtered, sort and add the top k to the ordered_content
     if vector_search:
         topk = similarity_k
@@ -356,7 +412,7 @@ def get_search_results(query: str, indexes: list,
     return ordered_content
 
 
-def update_vector_indexes(ordered_search_results: dict, embedder: OpenAIEmbeddings):
+def update_vector_indexes(ordered_search_results: dict, embedder: AzureOpenAIEmbeddings):
     
     """Get as input the results of a text-based multi-index search, vectorize the documents chunks that has not been done before and updates the vector-based indexes"""
     
@@ -381,34 +437,37 @@ def update_vector_indexes(ordered_search_results: dict, embedder: OpenAIEmbeddin
                             },
                         ]
                     }
-
+                    print("Before request.post")
                     r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+"-vector" + "/docs/index",
                                          data=json.dumps(upload_payload), headers=headers, params=params)
+                    
+                    print("R.text: ")
+                    print(r.text)
                     if r.status_code != 200:
                         print(r.status_code)
                         print(r.text)
                     else:
                         i = i + 1 #increment chunk number
-
-                        # Update document in text-based index and mark it as "vectorized"
-                        upload_payload = {
-                            "value": [
-                                {
-                                    "id": key,
-                                    "vectorized": True,
-                                    "@search.action": "merge"
-                                },
-                            ]
-                        }
-
-                        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+ "/docs/index",
-                                         data=json.dumps(upload_payload), headers=headers, params=params)
-
-
+                        
                 except Exception as e:
                     print("Exception:",e)
-                    print(r.content)
+                    print(chunk)
                     continue
+
+        # Update document in text-based index and mark it as "vectorized"
+        upload_payload = {
+            "value": [
+                {
+                    "id": key,
+                    "vectorized": True,
+                    "@search.action": "merge"
+                },
+            ]
+        }
+
+        r = requests.post(os.environ['AZURE_SEARCH_ENDPOINT'] + "/indexes/" + value["index"]+ "/docs/index",
+                         data=json.dumps(upload_payload), headers=headers, params=params)
+
 
 
 def get_answer(llm: AzureChatOpenAI,
@@ -474,63 +533,12 @@ def run_agent(question:str, agent_chain: AgentExecutor) -> str:
             continue
     
     return response
-# function to verify if Semantic Search is available is Cognitive Search instance
-def semanticEnabled( searchService, azSubscription, azResourceGroup ) :
-
-    # get name of Search Service, in case endpoint name is passed
-    if ( searchService[ : 8 ] ).upper() == "HTTPS://" :
-
-        parseService = urlparse( searchService )
-
-        urlSplit = ( parseService.hostname ).split( "." )
-
-        searchName = urlSplit[ 0 ]
-
-    else :
-
-        searchName = searchService
-
-    loginUrl = "https://login.microsoftonline.us/"
-    mgmtUrl = "https://management.usgovcloudapi.net/"
-    apiVersion = "2022-09-01"
-    csApiVersion = "2021-06-06-Preview"
-
-    # variable to track if Semantic Search is enabled or disabled - disabled by default ( disabled = 0, enabled = 1 )
-    semanticStatus = 0
-
-    parentResourcePath = "/subscriptions/" + azSubscription
-
-    authEndpoint = loginUrl + azSubscription
-
-    # grab credential for authenticated user within notebook
-    currCredential = DefaultAzureCredential( authority = authEndpoint )
-
-    # create connection to Search Service instance via Azure Resource Manager
-    scopeurl = mgmtUrl +  ".default"
-    resourceClient = ResourceManagementClient( currCredential, azSubscription, apiVersion, mgmtUrl, credential_scopes = [ scopeurl ] )
-
-    resourceInfo = resourceClient.resources.get( azResourceGroup, "Microsoft.Search", "", "searchServices", searchName, csApiVersion )
-
-    propSemantic = resourceInfo.properties[ "semanticSearch" ]
-
-    if propSemantic == "disabled" :
-
-        semanticStatus = 0
-
-    else :
-
-        semanticStatus = 1
-
-    return semanticStatus
-
-# print( "Semantic Status: ", str( semanticStatus ) )
-    
     
 
-######## TOOL CLASSES #####################################
+######## AGENTS AND TOOL CLASSES #####################################
 ###########################################################
     
-class DocSearchResults(BaseTool):
+class GetDocSearchResults_Tool(BaseTool):
     """Tool for Azure Search results"""
     
     name = "search knowledge base"
@@ -546,7 +554,7 @@ class DocSearchResults(BaseTool):
     
     def _run(self, query: str) -> str:
         
-        embedder = OpenAIEmbeddings(deployment=self.embedding_model, chunk_size=1)
+        embedder = AzureOpenAIEmbeddings(model="text-embedding-ada-002", skip_empty=True) 
     
         if self.indexes:
             # Search in text-based indexes first and update corresponding vector indexes
@@ -582,8 +590,8 @@ class DocSearchResults(BaseTool):
         raise NotImplementedError("DocSearchResults does not support async")
   
 
-class DocSearchTool(BaseTool):
-    """Tool for Azure GPT Smart Search Engine"""
+class DocSearchAgent(BaseTool):
+    """Agent to interact with for Azure AI Search """
     
     name = "@docsearch"
     description = "useful when the questions includes the term: @docsearch.\n"
@@ -599,7 +607,7 @@ class DocSearchTool(BaseTool):
     
     def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
-            tools = [DocSearchResults(indexes=self.indexes,vector_only_indexes=self.vector_only_indexes,
+            tools = [GetDocSearchResults_Tool(indexes=self.indexes,vector_only_indexes=self.vector_only_indexes,
                                       k=self.k, reranker_th=self.reranker_th, similarity_k=self.similarity_k,
                                       sas_token=self.sas_token, embedding_model=self.embedding_model)]
             
@@ -610,7 +618,8 @@ class DocSearchTool(BaseTool):
                                               agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
                                               agent_kwargs={'prefix':DOCSEARCH_PROMPT_PREFIX},
                                               callback_manager=self.callbacks,
-                                              verbose=self.verbose)
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
             
             for i in range(2):
                 try:
@@ -631,8 +640,8 @@ class DocSearchTool(BaseTool):
     
     
 
-class CSVTabularTool(BaseTool):
-    """Tool CSV agent"""
+class CSVTabularAgent(BaseTool):
+    """Agent to interact with CSV files"""
     
     name = "@csvfile"
     description = "useful when the questions includes the term: @csvfile.\n"
@@ -643,7 +652,7 @@ class CSVTabularTool(BaseTool):
     def _run(self, query: str) -> str:
         
         try:
-            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks)
+            agent = create_csv_agent(self.llm, self.path, verbose=self.verbose, callback_manager=self.callbacks, handle_parsing_errors=True)
             for i in range(5):
                 try:
                     response = agent.run(CSV_PROMPT_PREFIX + query + CSV_PROMPT_SUFFIX) 
@@ -663,8 +672,8 @@ class CSVTabularTool(BaseTool):
         raise NotImplementedError("CSVTabularTool does not support async")
         
         
-class SQLDbTool(BaseTool):
-    """Tool SQLDB Agent"""
+class SQLSearchAgent(BaseTool):
+    """Agent to interact with SQL databases"""
     
     name = "@sqlsearch"
     description = "useful when the questions includes the term: @sqlsearch.\n"
@@ -693,7 +702,8 @@ class SQLDbTool(BaseTool):
             toolkit=toolkit,
             callback_manager=self.callbacks,
             top_k=self.k,
-            verbose=self.verbose
+            verbose=self.verbose,
+            handle_parsing_errors=True
         )
 
         for i in range(2):
@@ -739,50 +749,74 @@ class ChatGPTTool(BaseTool):
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("ChatGPTTool does not support async")
-        
-    
-    
-class BingSearchResults(BaseTool):
-    """Tool for a Bing Search Wrapper"""
 
-    name = "@bing"
-    description = "useful when the questions includes the term: @bing.\n"
+class GetAPISearchResults_Tool(BaseTool):
+    """APIChain as a tool"""
 
-    k: int = 5
+    name = "@apisearch"
+    description = "useful when the questions includes the term: @apisearch.\n"
+
+    llm: AzureChatOpenAI
+    api_spec: str
+    headers: dict = {}
+    limit_to_domains: list = []
+    verbose: bool = False
 
     def _run(self, query: str) -> str:
-        bing = BingSearchAPIWrapper(k=self.k)
+
+        chain = APIChain.from_llm_and_api_docs(
+                            llm=self.llm,
+                            api_docs=self.api_spec,
+                            headers=self.headers,
+                            verbose=self.verbose,
+                            limit_to_domains=self.limit_to_domains
+                            )
         try:
-            return bing.results(query,num_results=self.k)
-        except:
-            return "No Results Found"
-    
+            sleep(2) # This is optional to avoid possible TPM rate limits
+            response = chain.run(query)
+        except Exception as e:
+            response = e
+
+        return response
+
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("BingSearchResults does not support async")
-            
+        raise NotImplementedError("This Tool does not support async")
 
-class BingSearchTool(BaseTool):
-    """Tool for a Bing Search Wrapper"""
-    
-    name = "@bing"
-    description = "useful when the questions includes the term: @bing.\n"
-    
+
+class APISearchAgent(BaseTool):
+    """Agent to interact with any API given a OpenAPI 3.0 spec"""
+
+    name = "@apisearch"
+    description = "useful when the questions includes the term: @apisearch.\n"
+
     llm: AzureChatOpenAI
-    k: int = 5
-    
+    llm_search: AzureChatOpenAI
+    api_spec: str
+    headers: dict = {}
+    limit_to_domains: list = []
+    verbose: bool = False
+
     def _run(self, tool_input: Union[str, Dict],) -> str:
         try:
-            tools = [BingSearchResults(k=self.k)]
+            tools = [GetAPISearchResults_Tool(llm=self.llm,
+                                              llm_search=self.llm_search,
+                                              api_spec=str(self.api_spec),
+                                              headers=self.headers,
+                                              verbose=self.verbose,
+                                              limit_to_domains=self.limit_to_domains)]
+
             parsed_input = self._parse_input(tool_input)
 
-            agent_executor = initialize_agent(tools=tools, 
+            agent_executor = initialize_agent(tools=tools,
                                               llm=self.llm, 
-                                              agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
-                                              agent_kwargs={'prefix':BING_PROMPT_PREFIX},
+                                              agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                                              agent_kwargs={'prefix':APISEARCH_PROMPT_PREFIX},
                                               callback_manager=self.callbacks,
-                                              verbose=self.verbose)
-            
+                                              verbose=self.verbose,
+                                              handle_parsing_errors=True)
+
+
             for i in range(2):
                 try:
                     response = run_agent(parsed_input, agent_executor)
@@ -792,10 +826,12 @@ class BingSearchTool(BaseTool):
                     continue
 
             return response
-        
+
         except Exception as e:
             print(e)
-    
+
     async def _arun(self, query: str) -> str:
         """Use the tool asynchronously."""
-        raise NotImplementedError("BingSearchTool does not support async")
+        raise NotImplementedError("APISearchAgent does not support async")     
+        
+        
