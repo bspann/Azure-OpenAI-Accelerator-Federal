@@ -97,17 +97,14 @@ else:
                 vector_indexes = [index+"-vector" for index in text_indexes]
                 
                 # Search in text-based indexes first and update vector indexes
-                st.markdown("Calling get_search_results for text indexes")
                 top_k=10
                 ordered_results = get_search_results(query, text_indexes, k=top_k, 
                                                         reranker_threshold=1,
                                                         vector_search=False)
-                st.markdown("Calling update_vector_indexes")
                 update_vector_indexes(ordered_search_results=ordered_results, embedder=embedder)
 
                 # Search in all vector-based indexes available
                 top_similarity_k = 5
-                st.markdown("Calling get_search_results for vector indexes")
 
                 ordered_results = get_search_results(query, vector_indexes, k=top_k , vector_search=True, 
                                                         similarity_k=top_similarity_k,
