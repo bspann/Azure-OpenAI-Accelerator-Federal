@@ -11,7 +11,6 @@ COMBINE_QUESTION_PROMPT = PromptTemplate(
     template=COMBINE_QUESTION_PROMPT_TEMPLATE, input_variables=["context", "question", "language"]
 )
 
-
 COMBINE_PROMPT_TEMPLATE = """
 
 These are examples of how you must provide the answer:
@@ -72,8 +71,57 @@ QUESTION: {question}
 FINAL ANSWER IN {language}:"""
 
 
+COMBINE_PROMPT_TEMPLATE_SHORT = """
+
+These are examples of how you must provide the answer:
+
+--> Beginning of examples
+
+=========
+QUESTION: Which state/country's law governs the interpretation of the contract?
+=========
+Content: This Agreement is governed by English law and the parties submit to the exclusive jurisdiction of the English courts in  relation to any dispute (contractual or non-contractual) concerning this Agreement save that either party may apply to any court for an  injunction or other relief to protect its Intellectual Property Rights.
+Source: https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1
+
+Content: No Waiver. Failure or delay in exercising any right or remedy under this Agreement shall not constitute a waiver of such (or any other)  right or remedy.\n\n11.7 Severability. The invalidity, illegality or unenforceability of any term (or part of a term) of this Agreement shall not affect the continuation  in force of the remainder of the term (if any) and this Agreement.\n\n11.8 No Agency. Except as expressly stated otherwise, nothing in this Agreement shall create an agency, partnership or joint venture of any  kind between the parties.\n\n11.9 No Third-Party Beneficiaries.
+Source: https://yyyy.com/article2.html?s=lkhljkhljk&category=c&sort=asc
+
+Content: (b) if Google believes, in good faith, that the Distributor has violated or caused Google to violate any Anti-Bribery Laws (as  defined in Clause 8.5) or that such a violation is reasonably likely to occur,
+Source: https://yyyy.com/article3.csv?s=kjsdhfd&category=c&sort=asc&page=2
+
+Content: The terms of this Agreement shall be subject to the laws of Manchester, England, and any disputes arising from or relating to this Agreement shall be exclusively resolved by the courts of that state, except where either party may seek an injunction or other legal remedy to safeguard their Intellectual Property Rights.
+Source: https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc
+=========
+FINAL ANSWER IN English: This Agreement is governed by English law, specifically the laws of Manchester, England<sup><a href="https://xxx.com/article1.pdf?s=casdfg&category=ab&sort=asc&page=1" target="_blank">[1]</a></sup><sup><a href="https://ppp.com/article4.pdf?s=lkhljkhljk&category=c&sort=asc" target="_blank">[2]</a></sup>. \n Anything else I can help you with?.
+
+<-- End of examples
+
+# Instructions:
+- Given the following extracted parts from one or multiple documents, and a question, create a final answer with references. 
+- You can only provide numerical references to documents, using this html format: `<sup><a href="url?query_parameters" target="_blank">[number]</a></sup>`.
+- The reference must be from the `Source:` section of the extracted part. You are not to make a reference from the content, only from the `Source:` of the extract parts.
+- Reference (source) document's url can include query parameters, for example: "https://example.com/search?query=apple&category=fruits&sort=asc&page=1". On these cases, **you must** include que query references on the document url, using this html format: <sup><a href="url?query_parameters" target="_blank">[number]</a></sup>.
+- **You can only answer the question from information contained in the extracted parts below**, DO NOT use your prior knowledge.
+- Never provide an answer without references.
+- If you don't know the answer, just say that you don't know. Don't try to make up an answer.
+- Respond in {language}.
+
+=========
+QUESTION: {question}
+=========
+{summaries}
+=========
+FINAL ANSWER IN {language}:"""
+
+
+
 COMBINE_PROMPT = PromptTemplate(
     template=COMBINE_PROMPT_TEMPLATE, input_variables=["summaries", "question", "language"]
+)
+
+
+COMBINE_PROMPT_SHORT = PromptTemplate(
+    template=COMBINE_PROMPT_TEMPLATE_SHORT, input_variables=["summaries", "question", "language"]
 )
 
 
