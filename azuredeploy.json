@@ -353,7 +353,7 @@
     {
       "condition": "[parameters('deployAKS')]",
       "type": "Microsoft.ContainerService/managedClusters",
-      "apiVersion": "2022-05-02-preview",
+      "apiVersion": "2024-07-15-preview",
       "name": "[parameters('clusterName')]",
       "location": "[parameters('location')]",
       "identity": {
